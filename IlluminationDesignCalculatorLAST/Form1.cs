@@ -72,35 +72,7 @@ namespace IlluminationDesignCalculatorLAST
             }
         }
 
-        //tabbing    
-
-        //Area
-        #region Area
-        private void rdbArea_Click(object sender, EventArgs e)
-        {
-            nudLength.ReadOnly = true;
-            nudWidth.ReadOnly = true;
-            nudArea.ReadOnly = false;
-        }
-
-        private void rdbLenghtWidth_Click(object sender, EventArgs e)
-        {
-            nudLength.ReadOnly = false;
-            nudWidth.ReadOnly = false;
-            nudArea.ReadOnly = true;
-            nudArea.Value = nudLength.Value * nudWidth.Value;
-        }
-
-        private void nudLength_ValueChanged(object sender, EventArgs e)
-        {
-            nudArea.Value = nudLength.Value * nudWidth.Value;
-        }
-
-        private void nudWidth_ValueChanged(object sender, EventArgs e)
-        {
-            nudArea.Value = nudLength.Value * nudWidth.Value;
-        }
-        #endregion
+        //separate light fixtures into respective categories
 
 
         //Illumination
@@ -176,12 +148,16 @@ namespace IlluminationDesignCalculatorLAST
 
         //unit system 
         #region units
-        decimal mft = 0.092903M;
-        decimal ftm = 10.7639M;
+        decimal luxfc = 0.092903M;
+        decimal fclux = 10.7639M;
+        decimal ftm = 0.3048M;
+        decimal mft = 3.28084M;
         private void rbUnitEnglish_Click(object sender, EventArgs e)
         {
-            nudIllumination.Value = (decimal)nudIllumination.Value * mft;
-            lbA1.Text = "ft^2";
+            nudIllumination.Value = (decimal)nudIllumination.Value * luxfc;
+            nudLength.Value = (decimal)nudLength.Value * mft;
+            nudWidth.Value = (decimal)nudWidth.Value * mft;
+            nudHeight.Value = (decimal)nudHeight.Value * mft;
             lbA2.Text = "feet";
             lbA3.Text = "feet";
             lbA4.Text = "feet";
@@ -190,8 +166,10 @@ namespace IlluminationDesignCalculatorLAST
 
         private void rbUnitMetric_Click(object sender, EventArgs e)
         {
-            nudIllumination.Value = (decimal)nudIllumination.Value * ftm;
-            lbA1.Text = "m^2";
+            nudIllumination.Value = (decimal)nudIllumination.Value * fclux;
+            nudLength.Value = (decimal)nudLength.Value * ftm;
+            nudWidth.Value = (decimal)nudWidth.Value * ftm;
+            nudHeight.Value = (decimal)nudHeight.Value * ftm;
             lbA2.Text = "meters";
             lbA3.Text = "meters";
             lbA4.Text = "meters";
@@ -201,24 +179,29 @@ namespace IlluminationDesignCalculatorLAST
 
         //output
         private void buttonCalculate_Click(object sender, EventArgs e)
-        {
-            var area = nudArea.Value;
+        {            
+            cU();
+            mF();
+            reflectances();
+            var area = nudLength.Value * nudWidth.Value;
             var illumination = nudIllumination.Value;
-            double cu = 1;
-            var llf = 1;
             var lumens = nudLampLumens.Value;
             var lamp = nudLampFixture.Value;
+            mf = mf / 100;
+            cu = cu / 100;
             double top = (double)area * (double)illumination;
-            double bottom = (double)lamp * (double)lumens * (double)cu * (double)llf;
-
-            double results = top / bottom;
-            results = indexes;
-            tbLuminaires.Text = results.ToString("#.##");
+            decimal bottom = (decimal)lamp * (decimal)lumens * (decimal)cu * (decimal)mf;
+            double results = top / (double)bottom;
+            
+            tbLuminaires.Text = results.ToString("#.##");            
         }
 
         //cu
-        int reflectance = 0; // header column (placeholder)
-        double indexes = 0;
+        int reflectance;
+        decimal cu;
+        decimal mf;
+        int indx;
+        double indexes;
         private void reflectances()
         {
             if (cbCeiling.SelectedIndex == 0 && cbWall.SelectedIndex == 0)
@@ -258,19 +241,79 @@ namespace IlluminationDesignCalculatorLAST
                 reflectance = 8;
             }
         }
-        //test
         private void index()
         {
-            double top = 2 * (double)nudWidth.Value;
-            top = top + (double)nudLength.Value;
-            double bottom = 6 * (double)nudHeight.Value;
-            bottom = bottom - 2.5;
-            indexes = top / bottom;
+            double topp = 2 * (double)nudWidth.Value;
+            topp = topp + (double)nudLength.Value;
+            double bottomm = 6 * (double)nudHeight.Value;
+            bottomm = bottomm - 2.5;
+            indexes = topp / bottomm;
+
+            if (indexes < 0.7)
+            {
+                indx = 0;
+            }
+            if (indexes >= 0.7 || indexes < 0.9)
+            {
+                indx = 1;
+            }
+            if (indexes >= 0.9 || indexes < 1.125)
+            {
+                indx = 2;
+            }
+            if (indexes >= 1.125 || indexes < 1.135)
+            {
+                indx = 3;
+            }
+            if (indexes >= 1.135 || indexes < 1.75)
+            {
+                indx = 4;
+            }
+            if (indexes >= 1.75 || indexes < 2.25)
+            {
+                indx = 5;
+            }
+            if (indexes >= 2.25 || indexes < 2.75)
+            {
+                indx = 6;
+            }
+            if (indexes >= 2.75 || indexes < 3.5)
+            {
+                indx = 7;
+            }
+            if (indexes >= 3.5 || indexes < 4.5 )
+            {
+                indx = 8;
+            }
+            if (indexes >= 4.5)
+            {
+                indx = 9;
+            }
+        }
+        private void mF()
+        {
+            int[] mfG = new int[] { 75, 75, 75, 75, 80, 80, 70, 70, 75, 70, 65, 65, 60, 65, 70, 70, 70, 70, 70, 70, 70, 75, 75, 75, 75, 75, 75, 70, 70, 65, 65, 70, 70, 70, 60, 65, 70, 60 };
+            int[] mfM = new int[] { 65, 65, 60, 65, 72, 72, 66, 60, 65, 60, 55, 55, 50, 55, 65, 60, 60, 60, 60, 60, 60, 65, 65, 65, 65, 65, 65, 60, 60, 55, 55, 65, 65, 65, 50, 60, 65, 50 };
+            int[] mfP = new int[] { 55, 55, 40, 50, 65, 65, 45, 40, 55, 50, 45, 45, 45, 45, 55, 50, 55, 55, 55, 50, 55, 55, 55, 55, 55, 55, 55, 50, 50, 50, 50, 60, 60, 60, 40, 50, 55, 40 };
+            int[] spc = new int[] { 10, 10, 06, 10, 05, 11, 10, 08, 10, 08, 10, 10, 10, 09, 10, 10, 08, 08, 08, 10, 10, 10, 10, 10, 10, 10, 12, 12, 12, 12, 09, 12, 09, 12, 12, 12, 12, 12 };
+            if (cbMF.SelectedIndex == 0)
+            {
+                mf = mfG[cbLightFixture.SelectedIndex];
+            }
+            if (cbMF.SelectedIndex == 1)
+            {
+                mf = mfM[cbLightFixture.SelectedIndex];
+            }
+            if (cbMF.SelectedIndex == 2)
+            {
+                mf = mfP[cbLightFixture.SelectedIndex];
+            }
+            double space = spc[cbLightFixture.SelectedIndex];
         }
         private void cU()
         {
             reflectances();
-            #region cu arrays
+            #region porn columns
             //direct rlm dome reflector
             int[] cuDirectReflectorJ = new int[] { 37, 31, 27, 36, 31, 27, 31, 27 };
             int[] cuDirectReflectorI = new int[] { 45, 41, 38, 45, 40, 37, 40, 37 };
@@ -708,7 +751,7 @@ namespace IlluminationDesignCalculatorLAST
             int[] cuIndirectTwoLampB = new int[] { 42, 39, 36, 27, 25, 24, 15, 14 };
             int[] cuIndirectTwoLampA = new int[] { 43, 41, 38, 29, 27, 25, 16, 15 };
             #endregion
-            #region porn
+            #region porn rows
             int[] cuDirectReflector = new int[] { cuDirectReflectorJ[reflectance], cuDirectReflectorI[reflectance], cuDirectReflectorH[reflectance], cuDirectReflectorG[reflectance], cuDirectReflectorF[reflectance], cuDirectReflectorE[reflectance], cuDirectReflectorD[reflectance], cuDirectReflectorC[reflectance], cuDirectReflectorB[reflectance], cuDirectReflectorA[reflectance] };
             int[] cuDirectDeepReflector = new int[] { cuDirectDeepReflectorJ[reflectance], cuDirectDeepReflectorI[reflectance], cuDirectDeepReflectorH[reflectance], cuDirectDeepReflectorG[reflectance], cuDirectDeepReflectorF[reflectance], cuDirectDeepReflectorE[reflectance], cuDirectDeepReflectorD[reflectance], cuDirectDeepReflectorC[reflectance], cuDirectDeepReflectorB[reflectance], cuDirectDeepReflectorA[reflectance] };
             int[] cuDirectAluminumHighBay1 = new int[] { cuDirectAluminumHighBay1J[reflectance], cuDirectAluminumHighBay1I[reflectance], cuDirectAluminumHighBay1H[reflectance], cuDirectAluminumHighBay1G[reflectance], cuDirectAluminumHighBay1F[reflectance], cuDirectAluminumHighBay1E[reflectance], cuDirectAluminumHighBay1D[reflectance], cuDirectAluminumHighBay1C[reflectance], cuDirectAluminumHighBay1B[reflectance], cuDirectAluminumHighBay1A[reflectance] };
@@ -726,7 +769,7 @@ namespace IlluminationDesignCalculatorLAST
             int[] cuDirectVaporandDustTight = new int[] {cuDirectVaporandDustTightJ[reflectance], cuDirectVaporandDustTightI[reflectance], cuDirectVaporandDustTightH[reflectance], cuDirectVaporandDustTightG[reflectance], cuDirectVaporandDustTightF[reflectance], cuDirectVaporandDustTightE[reflectance], cuDirectVaporandDustTightD[reflectance], cuDirectVaporandDustTightC[reflectance], cuDirectVaporandDustTightB[reflectance], cuDirectVaporandDustTightA[reflectance]};
             int[] cuDirectTrofferOpen = new int[] { cuDirectTrofferOpenJ[reflectance], cuDirectTrofferOpenI[reflectance], cuDirectTrofferOpenH[reflectance], cuDirectTrofferOpenG[reflectance], cuDirectTrofferOpenF[reflectance], cuDirectTrofferOpenE[reflectance], cuDirectTrofferOpenD[reflectance], cuDirectTrofferOpenC[reflectance], cuDirectTrofferOpenB[reflectance], cuDirectTrofferOpenA[reflectance]};
             int[] cuDirectTrofferwithLouversOneLamp = new int[] { cuDirectTrofferwithLouversOneLampJ[reflectance], cuDirectTrofferwithLouversOneLampI[reflectance], cuDirectTrofferwithLouversOneLampH[reflectance], cuDirectTrofferwithLouversOneLampG[reflectance], cuDirectTrofferwithLouversOneLampF[reflectance], cuDirectTrofferwithLouversOneLampE[reflectance], cuDirectTrofferwithLouversOneLampD[reflectance], cuDirectTrofferwithLouversOneLampC[reflectance], cuDirectTrofferwithLouversOneLampB[reflectance], cuDirectTrofferwithLouversOneLampA[reflectance]};
-            int[] cuDirectTrofferwithLouversTwoLamps = new int[] { cuDirectTrofferwithLouversTwoLampsJ[reflectance], cuDirectTrofferwithLouversTwoLampsI[reflectance], cuDirectTrofferwithLouversTwoLampsH[reflectance], cuDirectTrofferwithLouversTwoLampsG[reflectance], cuDirectTrofferwithLouversTwoLampsF[reflectance], cuDirectTrofferwithLouversTwoLampsE[reflectance], cuDirectTrofferwithLouversTwoLampsD[reflectance], cuDirectTrofferwithLouversTwoLampsC[reflectance], cuDirectTrofferwithLouversTwoLampsB[reflectance], cuDirectTrofferwithLouversTwoLampsA[reflectance]};
+            int[] cuDirectTrofferwithLouversTwoLamps = new int[] { cuDirectTrofferwithLouversTwoLampsJ[reflectance], cuDirectTrofferwithLouversTwoLampsI[reflectance], cuDirectTrofferwithLouversTwoLampsH[reflectance], cuDirectTrofferwithLouversTwoLampsG[reflectance], cuDirectTrofferwithLouversTwoLampsF[reflectance], cuDirectTrofferwithLouversTwoLampsE[reflectance], cuDirectTrofferwithLouversTwoLampsD[reflectance], cuDirectTrofferwithLouversTwoLampsC[reflectance], cuDirectTrofferwithLouversTwoLampsB[reflectance], cuDirectTrofferwithLouversTwoLampsA[reflectance] };
             int[] cuDirectWithLouversfor40WattLamps = new int[] {cuDirectWithLouversfor40WattLampsJ[reflectance], cuDirectWithLouversfor40WattLampsI[reflectance], cuDirectWithLouversfor40WattLampsH[reflectance], cuDirectWithLouversfor40WattLampsG[reflectance], cuDirectWithLouversfor40WattLampsF[reflectance], cuDirectWithLouversfor40WattLampsE[reflectance], cuDirectWithLouversfor40WattLampsD[reflectance], cuDirectWithLouversfor40WattLampsC[reflectance], cuDirectWithLouversfor40WattLampsB[reflectance], cuDirectWithLouversfor40WattLampsA[reflectance], };
             int[] cuDirectBareLamp = new int[] {cuDirectBareLampJ[reflectance], cuDirectBareLampI[reflectance], cuDirectBareLampH[reflectance], cuDirectBareLampG[reflectance], cuDirectBareLampF[reflectance], cuDirectBareLampE[reflectance], cuDirectBareLampD[reflectance], cuDirectBareLampC[reflectance], cuDirectBareLampB[reflectance], cuDirectBareLampA[reflectance], };
             int[] cuSemidirectGlassEnclosed1 = new int[] {cuSemidirectGlassEnclosed1J[reflectance], cuSemidirectGlassEnclosed1I[reflectance], cuSemidirectGlassEnclosed1H[reflectance], cuSemidirectGlassEnclosed1G[reflectance], cuSemidirectGlassEnclosed1F[reflectance], cuSemidirectGlassEnclosed1E[reflectance], cuSemidirectGlassEnclosed1D[reflectance], cuSemidirectGlassEnclosed1C[reflectance], cuSemidirectGlassEnclosed1B[reflectance], cuSemidirectGlassEnclosed1A[reflectance], };
@@ -739,15 +782,31 @@ namespace IlluminationDesignCalculatorLAST
             int[] cuDirectIndirectRibbedGlassBottom = new int[] {cuDirectIndirectRibbedGlassBottomJ[reflectance], cuDirectIndirectRibbedGlassBottomI[reflectance], cuDirectIndirectRibbedGlassBottomH[reflectance], cuDirectIndirectRibbedGlassBottomG[reflectance], cuDirectIndirectRibbedGlassBottomF[reflectance], cuDirectIndirectRibbedGlassBottomE[reflectance], cuDirectIndirectRibbedGlassBottomD[reflectance], cuDirectIndirectRibbedGlassBottomC[reflectance], cuDirectIndirectRibbedGlassBottomB[reflectance], cuDirectIndirectRibbedGlassBottomA[reflectance], };
             int[] cuSemiDirectRibbedGlassBottom = new int[] {cuSemiDirectRibbedGlassBottomJ[reflectance], cuSemiDirectRibbedGlassBottomI[reflectance], cuSemiDirectRibbedGlassBottomH[reflectance], cuSemiDirectRibbedGlassBottomG[reflectance], cuSemiDirectRibbedGlassBottomF[reflectance], cuSemiDirectRibbedGlassBottomE[reflectance], cuSemiDirectRibbedGlassBottomD[reflectance], cuSemiDirectRibbedGlassBottomC[reflectance], cuSemiDirectRibbedGlassBottomB[reflectance], cuSemiDirectRibbedGlassBottomA[reflectance], };
             int[] cuDirectIndirectWithLouvers = new int[] {cuDirectIndirectWithLouversJ[reflectance], cuDirectIndirectWithLouversI[reflectance], cuDirectIndirectWithLouversH[reflectance], cuDirectIndirectWithLouversG[reflectance], cuDirectIndirectWithLouversF[reflectance], cuDirectIndirectWithLouversE[reflectance], cuDirectIndirectWithLouversD[reflectance], cuDirectIndirectWithLouversC[reflectance], cuDirectIndirectWithLouversB[reflectance], cuDirectIndirectWithLouversA[reflectance], };
-            int[] cuSemiDIrectWithLouvers = new int[] {cuSemiDIrectWithLouversJ[reflectance], cuSemiDIrectWithLouversI[reflectance], cuSemiDIrectWithLouversH[reflectance], cuSemiDIrectWithLouversG[reflectance], cuSemiDIrectWithLouversF[reflectance], cuSemiDIrectWithLouversE[reflectance], cuSemiDIrectWithLouversD[reflectance], cuSemiDIrectWithLouversC[reflectance], cuSemiDIrectWithLouversB[reflectance], cuSemiDIrectWithLouversA[reflectance], };
+            int[] cuSemiDirectWithLouvers = new int[] {cuSemiDIrectWithLouversJ[reflectance], cuSemiDIrectWithLouversI[reflectance], cuSemiDIrectWithLouversH[reflectance], cuSemiDIrectWithLouversG[reflectance], cuSemiDIrectWithLouversF[reflectance], cuSemiDIrectWithLouversE[reflectance], cuSemiDIrectWithLouversD[reflectance], cuSemiDIrectWithLouversC[reflectance], cuSemiDIrectWithLouversB[reflectance], cuSemiDIrectWithLouversA[reflectance], };
             int[] cuSemiIndirectTotallyEnclosed = new int[] {cuSemiIndirectTotallyEnclosedJ[reflectance], cuSemiIndirectTotallyEnclosedI[reflectance], cuSemiIndirectTotallyEnclosedH[reflectance], cuSemiIndirectTotallyEnclosedG[reflectance], cuSemiIndirectTotallyEnclosedF[reflectance], cuSemiIndirectTotallyEnclosedE[reflectance], cuSemiIndirectTotallyEnclosedD[reflectance], cuSemiIndirectTotallyEnclosedC[reflectance], cuSemiIndirectTotallyEnclosedB[reflectance], cuSemiIndirectTotallyEnclosedA[reflectance], };
             int[] cuSemiIndirectTwoLamps = new int[] {cuSemiIndirectTwoLampsJ[reflectance], cuSemiIndirectTwoLampsI[reflectance], cuSemiIndirectTwoLampsH[reflectance], cuSemiIndirectTwoLampsG[reflectance], cuSemiIndirectTwoLampsF[reflectance], cuSemiIndirectTwoLampsE[reflectance], cuSemiIndirectTwoLampsD[reflectance], cuSemiIndirectTwoLampsC[reflectance], cuSemiIndirectTwoLampsB[reflectance], cuSemiIndirectTwoLampsA[reflectance], };
             int[] cuIndirectGlass = new int[] {cuIndirectGlassJ[reflectance], cuIndirectGlassI[reflectance], cuIndirectGlassH[reflectance], cuIndirectGlassG[reflectance], cuIndirectGlassF[reflectance], cuIndirectGlassE[reflectance], cuIndirectGlassD[reflectance], cuIndirectGlassC[reflectance], cuIndirectGlassB[reflectance], cuIndirectGlassA[reflectance], };
             int[] cuIndirectSilveredBowl = new int[] {cuIndirectSilveredBowlJ[reflectance], cuIndirectSilveredBowlI[reflectance], cuIndirectSilveredBowlH[reflectance], cuIndirectSilveredBowlG[reflectance], cuIndirectSilveredBowlF[reflectance], cuIndirectSilveredBowlE[reflectance], cuIndirectSilveredBowlD[reflectance], cuIndirectSilveredBowlC[reflectance], cuIndirectSilveredBowlB[reflectance], cuIndirectSilveredBowlA[reflectance], };
             int[] cuIndirectTwoLamp = new int[] {cuIndirectTwoLampJ[reflectance], cuIndirectTwoLampI[reflectance], cuIndirectTwoLampH[reflectance], cuIndirectTwoLampG[reflectance], cuIndirectTwoLampF[reflectance], cuIndirectTwoLampE[reflectance], cuIndirectTwoLampD[reflectance], cuIndirectTwoLampC[reflectance], cuIndirectTwoLampB[reflectance], cuIndirectTwoLampA[reflectance], };
-            #endregion
+                      
+            index();
+            int[] cuLight = new int[] { cuDirectReflector[indx], cuDirectDeepReflector[indx], cuDirectAluminumHighBay1[indx],
+                cuDirectAluminumHighBay2[indx], cuDirectConcentratingMedium[indx], cuDirectWideHeavy[indx], cuDirectGlassteel[indx],
+                cuDirectSilverBowl[indx], cuDirectWideVapor[indx], cuEnclosedLens[indx], cuDirectTwo40[indx], cuDirectThree40[indx],
+                cuDirectTwo100[indx], cuDirectWithLouvers[indx], cuDirectVaporandDustTight[indx], cuDirectTrofferOpen[indx],
+                cuDirectTrofferwithLouversOneLamp[indx], cuDirectTrofferwithLouversTwoLamps[indx], cuDirectWithLouversfor40WattLamps[indx],
+                cuDirectBareLamp[indx], cuSemidirectGlassEnclosed1[indx], cuSemidirectGlassEnclosed2[indx], cuSemidirectGlassEnclosed3[indx],
+                cuSemidirectExposedLamps[indx], cuGeneralDiffuseTotallyEnclosed[indx], cuDirectIndirectSuspension[indx], 
+                cuSemidirectCeilingType[indx], cuDirectIndirectRibbedGlassBottom[indx], cuDirectIndirectWithLouvers[indx], 
+                cuSemiIndirectTwoLamps[indx], cuIndirectGlass[indx], cuIndirectSilveredBowl[indx], cuIndirectTwoLamp[indx] };             
+            cu = cuLight[cbLightFixture.SelectedIndex];
+            #endregion            
+            
+        }
 
-
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            this.Size = 350,600;
         }
     }
 }
