@@ -22,10 +22,12 @@ namespace IlluminationDesignCalculatorLAST
 
             if (cbTypeBuilding.SelectedIndex == 0)
             {
+                /*
                 cbLightingSystem0.Visible = true;
                 cbLightingSystem1.Visible = false;
                 cbLightingSystem2.Visible = false;
                 cbLightingSystem3.Visible = false;
+                */
                 //groupbox2
                 cbIlluminationResidential.Visible = true;
                 cbIlluminationCommercial.Visible = false;
@@ -34,23 +36,27 @@ namespace IlluminationDesignCalculatorLAST
             }
             if (cbTypeBuilding.SelectedIndex == 1)
             {
+                /*
                 cbLightingSystem0.Visible = false;
                 cbLightingSystem1.Visible = true;
                 cbLightingSystem2.Visible = false;
                 cbLightingSystem3.Visible = false;
+                */
                 //groupbox2
                 cbIlluminationResidential.Visible = false;
                 cbIlluminationCommercial.Visible = true;
                 cbIlluminationIndustrial.Visible = false;
-                cbLightingSystem3.Visible = false;
+               // cbLightingSystem3.Visible = false;
                 cbIlluminationAny.Visible = false;
             }
             if (cbTypeBuilding.SelectedIndex == 2)
             {
+                /*
                 cbLightingSystem0.Visible = false;
                 cbLightingSystem1.Visible = false;
                 cbLightingSystem2.Visible = true;
                 cbLightingSystem3.Visible = false;
+                */
                 //groupbox2
                 cbIlluminationResidential.Visible = false;
                 cbIlluminationCommercial.Visible = false;
@@ -59,11 +65,12 @@ namespace IlluminationDesignCalculatorLAST
             }
             if (cbTypeBuilding.SelectedIndex == 3)
             {
-
+                /*
                 cbLightingSystem0.Visible = false;
                 cbLightingSystem1.Visible = false;
                 cbLightingSystem2.Visible = false;
                 cbLightingSystem3.Visible = true;
+                */
                 //groupbox2
                 cbIlluminationResidential.Visible = false;
                 cbIlluminationCommercial.Visible = false;
@@ -177,7 +184,7 @@ namespace IlluminationDesignCalculatorLAST
         }
         #endregion
 
-        //output
+        //outputs
         private void buttonCalculate_Click(object sender, EventArgs e)
         {            
             cU();
@@ -806,7 +813,6 @@ namespace IlluminationDesignCalculatorLAST
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.Size = 350,600;
         }
     }
 }
